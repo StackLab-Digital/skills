@@ -37,6 +37,19 @@ Use DOM attributes or visible UI state when they provide the required data. The 
 
 When adding controls, guard against duplicates, attach handlers once, and use the app's visual conventions only after confirming their classes are present. For CSV export, serialize fields with proper CSV quoting/escaping, use a Blob/object URL, and revoke the URL after download; do not use the guide's abbreviated comma-join as production-safe serialization.
 
+## Distilled example patterns
+
+The upstream examples include a floating call control with a modal, loading and success overlays, a multi-step onboarding flow, mobile layout/navigation/theme adjustments, and a permission-dependent navigation item. Reuse the interaction patterns below, not their exact markup, selectors, colors, copy, or assumptions.
+
+- **Floating action + modal:** create one uniquely identified control and dialog, scope CSS to their root, wire open/close/cancel actions, and allow backdrop dismissal only when the backdrop itself was clicked. Use semantic `<button>` controls, accessible names, focus management, Escape handling, and mobile sizing. Validate form values and explain what the final action will do; the call-button sample only demonstrates a UI and does not actually place a call.
+- **Notifications and onboarding:** model steps and button state explicitly; keep next, previous, skip, and completion behavior consistent. Persist only a minimal preference when requested, under a namespaced key, and handle storage being unavailable. The success-notification sample's fixed content and persistence key are demo data, not a real integration signal.
+- **Loading states:** tie progress to real work and stop timers on completion, error, navigation, or teardown. The example's timer-driven progress is animation for a demo; never present elapsed-time animation as evidence that a real operation is progressing or succeeded.
+- **Responsive changes:** prefer scoped CSS media queries and a small resize handler over frequent polling. The mobile example contains deeply nested utility-class selectors and broad theme mutations; these are brittle and may disrupt upstream styles. Confirm structure at the target version, scope changes to the affected component, and restore original state when the viewport changes.
+- **Permission-based visibility:** the `hide-all` example fetches the profile, identifies the active account, and hides a navigation item for non-admins, failing closed when profile/account data is missing. This can guide a presentation-only UI customization, but hiding a link is not access control. Enforce permissions on the server and never rely on dashboard scripts to protect data or privileged actions. Verify the endpoint, client library, response shape, and permission names for the deployed version before using them.
+- **DOM resilience:** examples combine a duplicate-instance guard, immediate first pass, and `MutationObserver` to handle re-rendered UI. Use an instance key scoped to the module, make each transformation repeat-safe, filter mutation records to relevant nodes, and avoid observing `document.body` indefinitely. Do not pair observers with recurring intervals as a fallback unless a measured, bounded case requires it.
+
+The examples are demonstrations, not a security review or compatibility guarantee. In particular, broad `innerHTML` replacement, full-page selectors, logging whole profiles/stores, hidden navigation as authorization, unbounded `setInterval`, and mutating every descendant's theme classes should not be copied into production modules. Build inserted UI with DOM APIs and `textContent` when any content can be dynamic.
+
 ### Diagnostics and side effects
 
 The guide suggests checking the DOM and Vue store during development. Keep diagnostics opt-in and temporary: no always-on debug panel, broad click capture, full-store dumps, or console output containing personal/customer data. Keyboard shortcuts must avoid inputs, textareas, contenteditable regions, and collisions with existing shortcuts. Any action that creates or updates records needs explicit user intent, confirmation where consequential, and validation in a development environment before production use.
@@ -53,4 +66,4 @@ The guide suggests checking the DOM and Vue store during development. Keep diagn
 
 - Repository: [`StackLab-Digital/StackLabModulos`](https://github.com/StackLab-Digital/StackLabModulos)
 - Primary implementation reference (source reviewed at commit `1e09296548052cc3e6f7a0f851ba21f28765dcf6`): [`dashboard-scripts-documentation.md`](https://github.com/StackLab-Digital/StackLabModulos/blob/1e09296548052cc3e6f7a0f851ba21f28765dcf6/dashboard-scripts-documentation.md)
-- Examples: [`examples/`](https://github.com/StackLab-Digital/StackLabModulos/tree/master/examples)
+- Examples (reviewed at commit `1e09296548052cc3e6f7a0f851ba21f28765dcf6`): [`examples/`](https://github.com/StackLab-Digital/StackLabModulos/tree/1e09296548052cc3e6f7a0f851ba21f28765dcf6/examples)
